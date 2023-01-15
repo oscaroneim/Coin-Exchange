@@ -1,0 +1,43 @@
+.App {
+  text-align: center;
+  background-color: #3da4c6;
+}
+
+.App-logo {
+  height:8rem;
+  pointer-events: none;
+  
+}
+
+.coin-table{
+  margin: 100px auto 100px auto;
+  display: inline-block;
+  font-size:  1.4rem;
+  color: #f2f5f7;
+}
+
+
+
+.App-header {
+  background-color: #3da4c6;
+  min-height: 20vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 30px;
+  color: rgb(244, 244, 248);
+}
+
+.App-link {
+  color: #f2f5f7;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -27,7 +27,9 @@ export default class Head extends Component {
   render() {
     return (
       <Header>
-       <AppTitle>Coin Exchange 3000</AppTitle>
+       <AppTitle>
+        Coin Exchange 3000
+        </AppTitle>
        <Img src={logo} alt="React logo failed to load"/>
        </Header>
     )

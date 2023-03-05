@@ -1,97 +1,100 @@
 import AccountBalance from './components/Coin/AccountBalance/AccountBalance.jsx';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import CoinList from './components/CoinList/CoinList';
 import Head from './components/Head/Head';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const Div = styled.div`
  text-algin: center;
  background-color: #3da4c6
 `;
 
+const COIN_COUNT = 10;
+const formatPrice = price => parseFloat(Number(price).toFixed(4));
 
-class App extends React.Component {
-state = {
+function App (props) {
 
-      showBalance: true,
-
-      balance: 100000,
+    const [balance, setBalance] = useState(100000);
+    const [showBalance, setShowBalance] = useState(true);
+    const [coinData, setCoinData] = useState([]);
+   
+   const componentDidMount = async () => {
+      const response = await axios.get('https://api.coinpaprika.com/v1/coins');
+      const coinIds = response.data.slice(0, COIN_COUNT).map(coin => coin.id);
+      const tickerUrl = 'https://api.coinpaprika.com/v1/tickers/';
+      const promises = coinIds.map(id => axios.get(tickerUrl + id));
+      const coinData = await Promise.all(promises);
+      const coinPriceData = coinData.map(function(response) {
+        const coin = response.data;
+        return {
+          key: coin.id,
+          name: coin.name,
+          ticker: coin.symbol,
+          balance: 0,
+          price: formatPrice(coin.quotes.USD.price),
+        };
+      }) 
       
-      coinData: [
-      {
-        name: 'Bitcoin',
-        ticker: 'BTC',
-        balance: 0.5,
-        price: 9999.99
-      },
-      {
-        name: 'Ethereum',
-        ticker: 'ETH',
-        balance: 12.5,
-        price: 1500,
-      },
-      {
-        name: 'Tether',
-        ticker: 'USDT',
-        balance: 20000,
-        price: 1
-      },
-      {
-        name: 'Ripple',
-        ticker: 'XRP',
-        balance: 22000,
-        price: .50
-      },
-      {
-        name: 'Bitcoin Cash',
-        ticker: 'BCH',
-        balance: 0,
-        price: 289.90
-      },
-     ]
-    }  
-   handleRefresh = (valueChangeTicker) => {
-    const newCoinData = this.state.coinData.map( function(values) {
-      let newValues = {...values}; //here we shallow clone the array
-      if(valueChangeTicker === newValues.ticker) {    //here use object orientation to find the value
-        const randomPercantage = 0.995 + Math.random() * 0.01
-        newValues.price *= randomPercantage;
+        //retirieve the prices
+          setCoinData(coinPriceData);
       }
-        return newValues; //here we return the cloned array
-        
+
+      useEffect(function(){
+        if(coinData.length === 0){
+          componentDidMount();
+        }
       });
+    
+     const toggleBalance = () => {
+            setShowBalance(oldValue => !oldValue);  
+          }
+        
       
-      this.setState({coinData: newCoinData})
-      
+     const handleRefresh = async (valueChangeId) => {
+        const tickerUrl = `https://api.coinpaprika.com/v1/tickers/${valueChangeId}`;
+        const response = await axios.get(tickerUrl);
+        debugger;
+        const newPrice = formatPrice(response.data.quotes.USD.price);
+        const newCoinData = coinData.map( function (values) {
+          let newValues = {...values}; 
+          if(valueChangeId === values.key) {   
+            newValues.price = newPrice;
+          }
+            return newValues;
+        });
+          setCoinData(newCoinData);
+     
     }
 
-      toggleBalance = () => {
-        this.setState( function(oldState) {
-          return {
-            ...oldState, //here we make a clone of the oldstate
-            showBalance: !oldState.showBalance  //here we are overtiting one of the states, showBalance. This means our showBalance is going to be negated meaning if it is currently true it will now be false
-          }
-        });
-      }
-   
-
-  render () {
      return (
     <Div>
       <Head />
-      <AccountBalance amount={this.state.balance} 
-      showBalance={this.state.showBalance} 
-      toggleBalance={this.toggleBalance} />
-      <CoinList coinData={this.state.coinData} 
-      showBalance={this.state.showBalance}
-      handleRefresh = {this.handleRefresh}/>
+      <AccountBalance amount={balance} 
+      showBalance={showBalance} 
+      toggleBalance={toggleBalance} />
+      <CoinList coinData={coinData} 
+      showBalance={showBalance}
+      handleRefresh = {handleRefresh}/>
      </Div>
-    )};
-
+    );
   }
+
+  
 
 
      
     
     export default App;
 
+
+
+
+
+
+
+
+
+
+
+   
